@@ -1,13 +1,35 @@
 const gql = require('graphql-tag');
-const { ApolloServer, PubSub } = require('apollo-server');
+const { ApolloServer, PubSub, SchemaDirectiveVisitor } = require('apollo-server');
+const { defaultFieldResolver, GraphQLString } = require('graphql')
 
 const pubSub = new PubSub();
 const NEW_ITEM = 'NEW_ITEM';
 
+class LogDirective extends SchemaDirectiveVisitor {
+    visitFieldDefinition(field) {
+        console.log(field);
+        const resolver = field.resolve || defaultFieldResolver; 
+        const { message } = this.args;
+        console.log("before: ", message)
+        field.args.push({
+            type: GraphQLString,
+            name: 'message'
+        })
+
+        field.resolve = (root, {message, ...args}, ctx, info) => {
+            console.log('after: ', message);
+            return resolver.call(this, root, args, ctx, info)
+        }
+    }
+}
+
 const typeDefs = gql`
+    directive @log(message: String = "my message (default from directive def)") on FIELD_DEFINITION
+
     type User {
-        id: ID!
-        username: String!
+        id: ID! @log(message: "not default (from id field typedefs)")
+        error: String! @deprecated
+        username: String! @log
         createdAt: Int!
     }
 
@@ -87,10 +109,13 @@ const resolvers = {
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    formatError: (e) => {
-        console.log(e)
-        return new Error('mine, not yours');
-    },
+    schemaDirectives: {
+        log: LogDirective
+    }, 
+    // formatError: (e) => {
+    //     console.log(e)
+    //     return new Error('mine, not yours');
+    // },
     context({connection, req}) {
         if (connection) {
             return {...connection.context}
