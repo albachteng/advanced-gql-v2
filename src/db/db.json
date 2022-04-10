@@ -44,6 +44,15 @@
       "avatar": "http",
       "createdAt": 1649369964716,
       "id": "ACDkdmvhsEkxNTvTRu8aA"
+    },
+    {
+      "email": "albachteng@gmail.com",
+      "password": "password",
+      "role": "ADMIN",
+      "verified": false,
+      "avatar": "http",
+      "createdAt": 1649604735283,
+      "id": "Iqcz7Nk_OEePM1B5mhx1Y"
     }
   ],
   "posts": [

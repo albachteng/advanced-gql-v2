@@ -1,6 +1,9 @@
 const gql = require('graphql-tag')
 
 module.exports = gql`
+  directive @authentication on FIELD_DEFINITION
+  directive @authorization(role: Role! = ADMIN) on FIELD_DEFINITION
+
   enum Theme {
     DARK
     LIGHT
@@ -14,7 +17,7 @@ module.exports = gql`
 
   type User {
     id: ID!
-    email: String!
+    email: String! @authentication @authorization
     avatar: String!
     verified: Boolean!
     createdAt: String!
